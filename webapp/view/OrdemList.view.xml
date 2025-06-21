@@ -75,7 +75,6 @@
 			<Button id="btnFaturar"  text="Faturar"   press="onChangeStatus('F')" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
 			<Button id="btnCancelar" text="Cancelar"  press="onChangeStatus('C')" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
         	<Button id="btnCriar"    text="{i18n>btnCriar}" press=".onClickMain" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
-			<Button id="btnCriar2"    text="teste" press=".onClickMain" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
 		</HBox>
 
         <t:Table id="_IDGenTable1" 
