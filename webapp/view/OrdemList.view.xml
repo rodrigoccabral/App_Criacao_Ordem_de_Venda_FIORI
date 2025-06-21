@@ -1,0 +1,149 @@
+<mvc:View controllerName="project1.controller.OrdemList"
+	xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns:core="sap.ui.core"
+	xmlns:t="sap.ui.table"
+	xmlns:fb="sap.ui.comp.filterbar"
+	xmlns:app="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
+
+    <Page id="page" title="{i18n>titleMain}">
+
+    <content>
+        <fb:FilterBar id="filterBarId" reset="onFilterReset"  search=".onFilterSearch">
+            <fb:filterGroupItems>
+					<fb:FilterGroupItem id="_IDGenFilterItem" name="OrdemId" label="Id Ordem"  groupName="__basic" visibleInFilterBar="true">
+						<fb:control>
+							<Input id="OVCab.OrdemId" value="{filter>/OrdemId}"/>
+						</fb:control>
+					</fb:FilterGroupItem>
+
+					<fb:FilterGroupItem id="_IDGenFilterItem1" name="ClienteId" label="Id Cliente"  groupName="__basic2" visibleInFilterBar="true">
+						<fb:control>
+							<Input id="OVCab.ClienteId" value="{filter>/ClienteId}"/>
+						</fb:control>
+					</fb:FilterGroupItem>
+            
+
+                    <fb:FilterGroupItem id="_IDGenFilterItem2" name="Ordenacao" label="Ordenacao"  groupName="__basic3" visibleInFilterBar="true">
+						<fb:control>
+							<Select id="OrdenacaoCampo" selectedKey="{filter>/OrdenacaoCampo}">
+								<items>
+									<core:Item id="_IDGenItem1" text="" key=""/>
+									<core:Item id="_IDGenItem2" text="OrdemId" key="OrdemId"/>
+									<core:Item id="_IDGenItem3" text="ClienteId" key="ClienteId"/>
+									<core:Item id="_IDGenItem4" text="DataCriacao" key="DataCriacao"/>
+									<core:Item id="_IDGenItem5" text="CriadoPor" key="CriadoPor"/>
+									<core:Item id="_IDGenItem6" text="TotalItens" key="TotalItens"/>
+									<core:Item id="_IDGenItem7" text="TotalFrete" key="TotalFrete"/>
+									<core:Item id="_IDGenItem8" text="TotalOrdem" key="TotalOrdem"/>
+									<core:Item id="_IDGenItem9" text="Status" key="Status"/>
+								</items>
+							</Select>
+						</fb:control>
+			        </fb:FilterGroupItem>
+
+
+                    <fb:FilterGroupItem id="_IDGenFilterItem3" name="Tipo" label="Tipo"  groupName="__basic4" visibleInFilterBar="true">
+						<fb:control>
+							<Select id="OrdenacaoTipo" selectedKey="{filter>/OrdenacaoTipo}">
+								<items>
+									<core:Item id="_IDGenItem10" text="" key=""/>
+									<core:Item id="_IDGenItem11" text="ASC" key="ASC"/>
+									<core:Item id="_IDGenItem12" text="DESC" key="DESC"/>
+								</items>
+							</Select>
+						</fb:control>
+					</fb:FilterGroupItem>
+
+                    <fb:FilterGroupItem id="_IDGenFilterItem4" name="LimiteId" label="Limite"  groupName="__basic5" visibleInFilterBar="true">
+						<fb:control>
+							<Input id="LimiteInputId" value="{filter>/Limite}"/>
+						</fb:control>
+					</fb:FilterGroupItem>
+
+                    <fb:FilterGroupItem id="_IDGenFilterItem5" name="IgnorarId" label="Ignorar"  groupName="__basic6" visibleInFilterBar="true">
+						<fb:control>
+							<Input id="IgnorarInputId" value="{filter>/Ignorar}"/>
+						</fb:control>
+					</fb:FilterGroupItem>
+                </fb:filterGroupItems>
+            
+        </fb:FilterBar>
+		
+		<HBox id="_IDGenHBox1" justifyContent="End">
+			<Button id="btnFornecer" text="Fornecer"  press="onChangeStatus('L')" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
+			<Button id="btnFaturar"  text="Faturar"   press="onChangeStatus('F')" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
+			<Button id="btnCancelar" text="Cancelar"  press="onChangeStatus('C')" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
+        	<Button id="btnCriar"    text="{i18n>btnCriar}" press=".onClickMain" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
+		</HBox>
+
+        <t:Table id="_IDGenTable1" 
+                     rows="{Table>/}" 
+                     selectionMode="MultiToggle" 		
+                     class="sapUiSmallMargin"
+                     rowMode="Fixed"
+                     threshold="10"
+                     enableBusyIndicator="true">
+				<t:columns>
+					<t:Column id="_IDGenColumn">
+                        <Label text="Id Ordem" id="_IDGenLabel"/>
+                            <t:template>
+                                <Text text="{Table>OrdemId}" id="_IDGenText1" />
+                            </t:template>
+					</t:Column>
+					<t:Column id="_IDGenColumn1">
+                        <Label text="Data Criação" id="_IDGenLabel1"/>
+                            <t:template>
+                               <Text text="{Table>DataCriacao}" id="_IDGenText2" />
+                            </t:template>
+					</t:Column>
+					<t:Column id="_IDGenColumn2">
+                        <Label text="Id Cliente" id="_IDGenLabel2"/>
+                            <t:template>
+                                <Text text="{Table>ClienteId}" id="_IDGenText3" />
+                            </t:template>
+					</t:Column>
+					<t:Column id="_IDGenColumn3">
+                        <Label text="Criado Por" id="_IDGenLabel3"/>
+                            <t:template>
+                                <Text text="{Table>CriadoPor}" id="_IDGenText4" />
+                            </t:template>
+					</t:Column>
+                    <t:Column id="_IDGenColumn4">
+                        <Label text="Total Itens" id="_IDGenLabel4"/>
+                            <t:template>
+                                <Text text="{Table>TotalItens}" id="_IDGenText5" />
+                            </t:template>
+					</t:Column>
+                    <t:Column id="_IDGenColumn5">
+                        <Label text="Total Frete" id="_IDGenLabel5"/>
+                            <t:template>
+                                <Text text="{Table>TotalFrete}" id="_IDGenText6" />
+                            </t:template>
+					</t:Column>
+                    <t:Column id="_IDGenColumn6">
+                        <Label text="Total Ordem" id="_IDGenLabel6"/>
+                            <t:template>
+                                <Text text="{Table>TotalOrdem}" id="_IDGenText7" />
+                            </t:template>
+					</t:Column>
+                    <t:Column id="_IDGenColumn7">
+                        <Label text="Status" id="_IDGenLabel7"/>
+                            <t:template>
+                                <Text text="{Table>Status}" id="_IDGenText8" />
+                            </t:template>
+					</t:Column>
+                    <t:Column id="_IDGenColumn8">
+                        <Label text="Opções" id="_IDGenLabel8"/>
+                            <t:template>
+							<HBox id="_IDGenHBox">
+                                <Button id="btnEditar" icon="sap-icon://edit" press=".onClickMain" />
+								<Button id="btnDeleteList" icon="sap-icon://delete" press=".onDelete" class="sapUiTinyMarginBegin"/>
+							</HBox>
+                            </t:template>													
+					</t:Column>
+				</t:columns>
+			</t:Table>
+    </content>
+    </Page>
+</mvc:View>

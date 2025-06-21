@@ -1,0 +1,148 @@
+<mvc:View controllerName="project1.controller.OrdemForm"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+	xmlns:f="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+    xmlns:t="sap.ui.table">
+    <Page id="page2" title="{i18n>titleOrder}" showNavButton="true" navButtonPress="onNavBack" showHeader="true" enableScrolling="true" class="sapUiContentPadding">
+        <VBox class="sapUiSmallMargin" id="VBoxId">
+            <f:Form id="FormChange354" editable="true">
+                <f:title>
+                    <core:Title text="{i18n>header}" id="TitleId" />
+                </f:title>
+                <f:layout>
+                    <f:ResponsiveGridLayout
+                        id="ResponsiveGridLayoutId"
+                        labelSpanXL="3"
+                        labelSpanL="3"
+                        labelSpanM="3"
+                        labelSpanS="12"
+                        adjustLabelSpan="false"
+                        emptySpanXL="4"
+                        emptySpanL="4"
+                        emptySpanM="4"
+                        emptySpanS="0"
+                        columnsXL="1"
+                        columnsL="1"
+                        columnsM="1"
+                        singleContainerFullSize="false" />
+                </f:layout>
+                <f:formContainers>
+                    <f:FormContainer id="FormContainerId">
+                        <f:formElements>
+                            <f:FormElement label="{i18n>idOrdem}" id="idOrdemId">
+                                <f:fields>
+                                    <Input value="{Ordem>/OrdemId}" id="idOrdem" editable="false"/>
+                                </f:fields>
+                            </f:FormElement>
+                            <f:FormElement label="{i18n>dtCriacao}" id="dtCriacaoId" >
+                                <f:fields>
+                                    <DateTimePicker id="DTP1" 
+                                                    placeholder="{i18n>dtehr}" 
+                                                    value="{path: 'Ordem>/DataCriacao', type: 'sap.ui.model.odata.type.DateTimeOffset'}"
+                                                    displayFormat="dd/MM/yyyy HH:mm:ss"
+                                                    valueFormat="yyyy-MM-ddTHH:mm:ss"/>
+                                </f:fields>
+                            </f:FormElement>
+                            <f:FormElement label="{i18n>criadoPor}" id="criadoPorId">
+                                <f:fields>
+                                    <Input value="{Ordem>/CriadoPor}" id="criadoPor"/>
+                                </f:fields>
+                            </f:FormElement>
+                            <f:FormElement label="{i18n>idCliente}" id="idClienteId">
+                                <f:fields>
+                                    <Input value="{Ordem>/ClienteId}" id="idCliente" required="true" />
+                                </f:fields>
+                            </f:FormElement>
+                            <f:FormElement label="{i18n>totalItens}" id="totalItensId">
+                                <f:fields>
+                                    <Input value="{Ordem>/TotalItens}" id="totalItens" editable="false"/>
+                                </f:fields>
+                            </f:FormElement>
+                            <f:FormElement label="{i18n>totalFrete}" id="totalFreteId">
+                                <f:fields>
+                                    <Input value="{Ordem>/TotalFrete}" id="totalFrete" liveChange="onChangePrice"/>
+                                </f:fields>
+                            </f:FormElement>
+                            <f:FormElement label="{i18n>totalOrdem}" id="totalOrdemId">
+                                <f:fields>
+                                    <Input value="{Ordem>/TotalOrdem}" id="totalOrdem" editable="false"/>
+                                </f:fields>
+                            </f:FormElement>
+                             <f:FormElement label="{i18n>status}" id="statusId">
+                                <f:fields>
+                                    <ComboBox id="ComboId"
+                                              selectedKey="{Ordem>/Status}"
+                                              items="{
+                                                path: 'Lista>/statusLista'
+                                                    }">
+                                        <core:Item id="ItemComboId" key="{Lista>key}" text="{Lista>status}" />
+			                        </ComboBox>
+                                </f:fields>
+                            </f:FormElement>
+                        </f:formElements>
+                    </f:FormContainer>
+                </f:formContainers>
+            </f:Form>
+	    </VBox>  
+
+        <Button text="{i18n>btnNovoItem}" id="btnNovoItem" press="onNewItem" />   
+
+        	<t:Table id="TableItemsId" 
+                     rows="{Ordem>/toOVItem}" 
+                     selectionMode="MultiToggle" 		
+                     class="sapUiSmallMargin"
+                     rowMode="Fixed"
+                     threshold="10"
+                     enableBusyIndicator="true">
+				<t:columns>
+					<t:Column id="columnId1">
+                        <Label text="{i18n>item}" id="labelId1"/>
+                            <t:template>
+                                <Text text="{Ordem>ItemId}" id="textId1" />
+                            </t:template>
+					</t:Column>
+					<t:Column id="columnId2">
+                        <Label text="{i18n>material}" id="labelId2"/>
+                            <t:template>
+                                <Input value="{Ordem>Material}" id="textId2" valueLiveUpdate="true"/>
+                            </t:template>
+					</t:Column>
+					<t:Column id="columnId3">
+                        <Label text="{i18n>descricao}" id="labelId3"/>
+                            <t:template>
+                                <Input value="{Ordem>Descricao}" id="textId3" valueLiveUpdate="true"/>
+                            </t:template>
+					</t:Column>
+					<t:Column id="columnId4">
+                        <Label text="{i18n>quantidade}" id="labelId4"/>
+                            <t:template>
+                                <Input value="{Ordem>Quantidade}" id="QuantidadeId" liveChange="onChangePrice" valueLiveUpdate="true"/>
+                            </t:template>
+					</t:Column>
+                    <t:Column id="columnId5">
+                        <Label text="{i18n>precoUnitario}" id="labelId5"/>
+                            <t:template>
+                                <Input value="{Ordem>PrecoUni}" id="PrecoUnitarioId" valueLiveUpdate="true" liveChange="onChangePrice"/>
+                            </t:template>
+					</t:Column>
+                    <t:Column id="columnId6">
+                        <Label text="{i18n>precoTotal}" id="PrecoTotalId"/>
+                            <t:template>
+                                <Input value="{Ordem>PrecoTot}" id="textId6" editable="false" />
+                            </t:template>
+					</t:Column>
+                    <t:Column id="columnId7">
+                        <Label text="{i18n>opcao}" id="labelId7"/>
+                            <t:template>
+                                <Button id="btnDelete" icon="sap-icon://delete" press="onDeleteRow" />
+                            </t:template>
+					</t:Column>
+				</t:columns>
+			</t:Table>
+
+            <Button id="btnCriarOrdemId" text="Criar" icon="sap-icon://create" press=".onCreateDeepOrder" />
+            <Button id="btnDeleteForm" text="Deletar" icon="sap-icon://delete" press=".onDelete" class="sapUiTinyMarginBegin"/>
+    </Page>
+</mvc:View>
