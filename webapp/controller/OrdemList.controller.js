@@ -151,7 +151,7 @@ sap.ui.define(
     },
 
     onChangeStatus : function (status) {
-
+      const that = this;
       const oView = this.getView();
       let oTable = oView.byId("_IDGenTable1");
       let aSelectedIdx = oTable.getSelectedIndices();
@@ -160,8 +160,11 @@ sap.ui.define(
       let oModel = this.getOwnerComponent().getModel();
       let oEmptyModel = new sap.ui.model.json.JSONModel();
       oEmptyModel.setData([]);
-      oView.setBusy(true);
-      for(let i = 0; i < aSelectedIdx.length; i++) {
+
+      let completed = 0;
+      let total = aSelectedIdx.length;
+      let aResponse = [];
+      for(let i = 0; i < total; i++) {
 
         oModel.callFunction("/ZFI_ATUALIZA_STATUS", {
           method: "GET",
@@ -172,13 +175,45 @@ sap.ui.define(
           success : function (oData) {
             aTableData[aSelectedIdx[i]].Status = status;
             oTModel.setData(aTableData);
+            aResponse.push(oData.results);
+
+            completed++;
+            if (completed === total) {
+              that.onOpenDialog(aResponse);
+            };
+
           },
           error : function (oResponse) {
+            aResponse.push(JSON.parse(oResponse.responseText).error.message.value);
+            
+            completed++;
+            if (completed === total) {
+              that.onOpenDialog(aResponse);
+            };
 
           }
         }
       )};
-        oView.setBusy(false);
+    },
+
+    onOpenDialog : function (aResponse) {
+        const oView = this.getView();
+        let aMensagens = aResponse.flat();
+        let oMensagensModel = new sap.ui.model.json.JSONModel();
+        oMensagensModel.setData(aMensagens);
+        oView.setModel(oMensagensModel, "Mensagens");
+
+        if(!this.oDialog){
+          this.oDialog = this.byId("dialogInfoId");
+          this.oDialog.open();
+        } else {
+          this.oDialog.open();
+        };
+    },
+
+    onCloseDialog : function () {
+      this.oDialog.close();
     }
+
   });
 });

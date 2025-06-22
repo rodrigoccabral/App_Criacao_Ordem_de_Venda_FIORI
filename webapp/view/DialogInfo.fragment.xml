@@ -1,0 +1,30 @@
+<core:FragmentDefinition id="_IDGenFragmentDefinition"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:t="sap.ui.table">
+
+    <Dialog id="dialogInfoId" title="Informação">
+    <Title id="_IDGenTitle" text="Mensagens" level="H4" />
+        <t:Table id="dialogTableId"
+                 rows="{Mensagens>/}">
+                 <t:columns>
+
+                    <t:Column id="_IDGenColumn10" >
+                        <Label id="_IDGenLabel9" text="Tipo"></Label>
+                        <t:template>
+                            <Text id="_IDGenText" text="{Mensagens>Tipo}"></Text>
+                        </t:template>
+                    </t:Column>
+
+                    <t:Column id="_IDGenColumn11" >
+                        <Label id="_IDGenLabel10" text="Mensagem"></Label>
+                        <t:template>
+                            <Text id="_IDGenText9" text="{Mensagens>Mensagem}"></Text>
+                        </t:template>
+                    </t:Column>
+
+                 </t:columns>
+        </t:Table>
+        <Button id="btnFecharDialog" text="Fechar"  press=".onCloseDialog" class="sapUiSmallMarginEnd sapUiSmallMarginBottom"/>
+    </Dialog>
+</core:FragmentDefinition>
