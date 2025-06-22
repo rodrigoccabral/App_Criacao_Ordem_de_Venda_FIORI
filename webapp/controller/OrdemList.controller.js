@@ -150,8 +150,35 @@ sap.ui.define(
       )
     },
 
-    onChangeStatus : function (oEvent) {
-      
+    onChangeStatus : function (status) {
+
+      const oView = this.getView();
+      let oTable = oView.byId("_IDGenTable1");
+      let aSelectedIdx = oTable.getSelectedIndices();
+      let oTModel = oView.getModel("Table");
+      let aTableData = oTModel.getData();
+      let oModel = this.getOwnerComponent().getModel();
+      let oEmptyModel = new sap.ui.model.json.JSONModel();
+      oEmptyModel.setData([]);
+      oView.setBusy(true);
+      for(let i = 0; i < aSelectedIdx.length; i++) {
+
+        oModel.callFunction("/ZFI_ATUALIZA_STATUS", {
+          method: "GET",
+          urlParameters: {
+            ID_ORDEMID: aTableData[aSelectedIdx[i]].OrdemId,
+            ID_STATUS: status
+          },
+          success : function (oData) {
+            aTableData[aSelectedIdx[i]].Status = status;
+            oTModel.setData(aTableData);
+          },
+          error : function (oResponse) {
+
+          }
+        }
+      )};
+        oView.setBusy(false);
     }
   });
 });

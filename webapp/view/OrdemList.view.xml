@@ -71,9 +71,9 @@
         </fb:FilterBar>
 		
 		<HBox id="_IDGenHBox1" justifyContent="End">
-			<Button id="btnFornecer" text="Fornecer"  press="onChangeStatus('L')" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
-			<Button id="btnFaturar"  text="Faturar"   press="onChangeStatus('F')" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
-			<Button id="btnCancelar" text="Cancelar"  press="onChangeStatus('C')" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
+			<Button id="btnFornecer" text="Fornecido"  press="onChangeStatus('Fornecido')" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
+			<Button id="btnFaturar"  text="Faturado"   press="onChangeStatus('Faturado')"  class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
+			<Button id="btnCancelar" text="Cancelado"  press="onChangeStatus('Cancelado')" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
         	<Button id="btnCriar"    text="{i18n>btnCriar}" press=".onClickMain" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
 		</HBox>
 
