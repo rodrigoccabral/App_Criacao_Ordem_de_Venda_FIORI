@@ -1,7 +1,5 @@
 sap.ui.define(
-  [
-    //"sap/ui/core/mvc/Controller",
-    "project1/controller/BaseController", 
+  ["project1/controller/BaseController", 
     "sap/m/MessageToast", 
     "../model/formatter"],
   (Controller, MessageToast, formatter) => {
@@ -61,7 +59,8 @@ sap.ui.define(
 
         this.byId("DTP1").setEditable(false);
         this.byId("criadoPor").setEditable(false);
-        
+        this.getView().byId("btnCriarOrdemId").setText("Salvar");
+
         oModel1 = new sap.ui.model.json.JSONModel(this.createEmptyOrderObject());
         oModel1.setDefaultBindingMode(sap.ui.model.BindingMode.TwoWay);
 
@@ -73,12 +72,28 @@ sap.ui.define(
                         // items
                         oModel.read("/OVCabSet("+parseInt(ordemId, 10)+")/toOVItem",{
                             success: function(oData, oResponse){
-                                oOrdem.toOVItem = oData.results;
-                                oModel1.setData(oOrdem);
-                                oView.setModel(oModel1, "Ordem");
+                              const formatador = new Intl.NumberFormat("pt-BR", {
+                                                minimumFractionDigits: 2,
+                                                maximumFractionDigits: 2,
+                              });
+
+                              oData.results.forEach(item => {
+                                item.PrecoTot = formatador.format(item.PrecoTot);
+                                item.PrecoUni = formatador.format(item.PrecoUni);
+                              });
+
+                              oOrdem.toOVItem = oData.results;
+
+                              oOrdem.TotalFrete = formatador.format(oOrdem.TotalFrete);
+                              oOrdem.TotalItens = formatador.format(oOrdem.TotalItens);
+                              oOrdem.TotalOrdem = formatador.format(oOrdem.TotalOrdem);
+
+                              oModel1.setData(oOrdem);
+
+                              oView.setModel(oModel1, "Ordem");
                                 
-                                //that.recalcOrder();
-                                oView.setBusy(false);
+                              //that.recalcOrder();
+                              oView.setBusy(false);
                             },
                             
                             error: function(oResponse){
@@ -128,9 +143,7 @@ sap.ui.define(
             },
 
       _onRouteMatchedCreate: function (oEvent) {
-
-        //var oModel = this.getView().getModel();
-        //oModel.setData("", "OVCabSet");
+        this.getView().byId("btnCriarOrdemId").setText("Criar");
       },
 
       onNavBack: function () {
@@ -264,7 +277,33 @@ sap.ui.define(
         _oInput.setValue(val);
 
         if (sId.includes("totalFrete")) {
-          oModel.setProperty("/TotalOrdem", val);
+
+          let aItems = oModel.getProperty("/toOVItem") || [];
+          let totalItens = 0;
+          let totalOrdem = 0;
+          let totalFrete = 0;
+
+          aItems.forEach((item) => {
+            const valor = this.parseBRNumber(item.PrecoTot);
+            if (!isNaN(valor)) {
+              totalItens += valor;
+            };
+          });
+
+          totalFrete = this.parseBRNumber(val);
+
+          if (isNaN(totalFrete)) {
+            totalFrete = 0;
+          };
+
+          totalOrdem = totalFrete + totalItens;
+          const totalOrdemFormatado = new Intl.NumberFormat("pt-BR", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+          }).format(totalOrdem);
+
+          oModel.setProperty("/TotalOrdem", totalOrdemFormatado);
+
           return;
         }
 
@@ -286,7 +325,7 @@ sap.ui.define(
 
         var oModel = this.getView().getModel();
 
-        this.getView().setBusy(true);
+
 
         var oData = JSON.parse(
           JSON.stringify(this.getView().getModel("Ordem").getData())
@@ -308,28 +347,34 @@ sap.ui.define(
         if(criar) {
           delete oData.OrdemId;
         };
-        oData.ClienteId = parseInt(oData.ClienteId);
-
-        oData.DataCriacao = new Date(); // sem formatação
 
         oData.TotalItens = this.parseBRNumber(oData.TotalItens).toFixed(2);
         oData.TotalFrete = this.parseBRNumber(oData.TotalFrete).toFixed(2);
         oData.TotalOrdem = this.parseBRNumber(oData.TotalOrdem).toFixed(2);
 
+        oData.ClienteId = parseInt(oData.ClienteId);
+
+        oData.DataCriacao = new Date(); // sem formatação
+
         oData.toOVItem.forEach(function (item) {
           item.Quantidade = parseFloat(
             that.parseBRNumber(item.Quantidade).toFixed(2)
           );
+
           item.PrecoUni = that.parseBRNumber(item.PrecoUni).toFixed(2);
           item.PrecoTot = that.parseBRNumber(item.PrecoTot).toFixed(2);
 
           delete item.Options;
         });
 
+        this.getView().setBusy(true);
+
         oModel.create("/OVCabSet", oData, {
           success: function (oData2, result) {
+            let oModel = that.getView().getModel("Ordem");
             that.getView().setBusy(false);
-            that.getView().getModel("Ordem").setProperty("/OrdemId", oData2.OrdemId);
+            oModel.setProperty("/OrdemId", oData2.OrdemId);  
+
 
           if(criar) {
             MessageToast.show("Registro cadastrado com sucesso!");

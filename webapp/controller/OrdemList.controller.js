@@ -1,17 +1,19 @@
 sap.ui.define(
   [
-    //"sap/ui/core/mvc/Controller",
-  "project1/controller/BaseController",
-   "sap/m/MessageToast"], 
-   (Controller, MessageToast) => {
+    "project1/controller/BaseController",
+    "sap/m/MessageToast",
+    "../model/formatter"],
+   (Controller, MessageToast, formatter) => {
   "use strict";
 
   return Controller.extend("project1.controller.OrdemList", {
+    formatter: formatter,
+    
     onInit() {
 
       var oModel = new sap.ui.model.json.JSONModel();
       oModel.setData([]);
-      this.getView().setModel(oModel, "Table");
+      this.getView().setModel(oModel, "orderTableModel");
       oModel.setDefaultBindingMode(sap.ui.model.BindingMode.TwoWay);
 
       var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
@@ -55,8 +57,19 @@ sap.ui.define(
 
       oModel.read("/OVCabSet", {
         success : function (oData, oResponse) {
+          const formatador = new Intl.NumberFormat("pt-BR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
+
+          oData.results.forEach(item => {
+            item.TotalFrete = formatador.format(item.TotalFrete);
+            item.TotalItens = formatador.format(item.TotalItens);
+            item.TotalOrdem = formatador.format(item.TotalOrdem);
+          });
+
           oModelData.setData(oData.results);
-          oView.setModel(oModelData, "Table");
+          oView.setModel(oModelData, "orderTableModel");
           oView.setBusy(false);
         },
 
@@ -75,7 +88,7 @@ sap.ui.define(
 
 
       if (oBtn.includes("btnEditar")) {
-        var oContext = oEvent.getSource().getBindingContext("Table");
+        var oContext = oEvent.getSource().getBindingContext("orderTableModel");
         var oDadosLinha = oContext.getObject();
         var id = oDadosLinha.OrdemId;
 
@@ -89,7 +102,7 @@ sap.ui.define(
       var oView = this.getView();
       var oModel = this.getOwnerComponent().getModel();
       var oFModel = oView.getModel("filter");
-      var oTModel = oView.getModel("Table");
+      var oTModel = oView.getModel("orderTableModel");
 
       var oFData = oFModel.getData();
 
@@ -153,29 +166,41 @@ sap.ui.define(
     onChangeStatus : function (status) {
       const that = this;
       const oView = this.getView();
-      let oTable = oView.byId("_IDGenTable1");
-      let aSelectedIdx = oTable.getSelectedIndices();
-      let oTModel = oView.getModel("Table");
+      let oTable = oView.byId("orderListTable");
+      //let aSelectedIdx = oTable.getSelectedIndices();
+      let aSelectedItems = oTable.getSelectedItems();
+      let oTModel = oView.getModel("orderTableModel");
       let aTableData = oTModel.getData();
       let oModel = this.getOwnerComponent().getModel();
       let oEmptyModel = new sap.ui.model.json.JSONModel();
       oEmptyModel.setData([]);
 
       let completed = 0;
-      let total = aSelectedIdx.length;
+      let total = aSelectedItems.length;
       let aResponse = [];
-      for(let i = 0; i < total; i++) {
+
+        if (total === 0) {
+    MessageToast.show("Nenhum item selecionado.");
+    return;
+  }
+
+      aSelectedItems.forEach(function(oItem) {
+
+        const oContext = oItem.getBindingContext("orderTableModel");
+        const oData = oContext.getObject(); // Objeto da linha selecionada
 
         oModel.callFunction("/ZFI_ATUALIZA_STATUS", {
           method: "GET",
           urlParameters: {
-            ID_ORDEMID: aTableData[aSelectedIdx[i]].OrdemId,
+            ID_ORDEMID: oData.OrdemId,
             ID_STATUS: status
           },
-          success : function (oData) {
-            aTableData[aSelectedIdx[i]].Status = status;
-            oTModel.setData(aTableData);
-            aResponse.push(oData.results);
+          success : function (oResult) {
+            oData.Status = status;
+
+            oTModel.refresh();
+
+            aResponse.push(oResult.results);
 
             completed++;
             if (completed === total) {
@@ -183,17 +208,16 @@ sap.ui.define(
             };
 
           },
-          error : function (oResponse) {
-            aResponse.push(JSON.parse(oResponse.responseText).error.message.value);
+          error : function (oError) {
+            aResponse.push(JSON.parse(oError.responseText).error.message.value);
             
             completed++;
             if (completed === total) {
               that.onOpenDialog(aResponse);
             };
-
           }
-        }
-      )};
+        });
+      });
     },
 
     onOpenDialog : function (aResponse) {

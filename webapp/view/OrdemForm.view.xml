@@ -3,8 +3,7 @@
     xmlns="sap.m"
     xmlns:l="sap.ui.layout"
 	xmlns:f="sap.ui.layout.form"
-    xmlns:core="sap.ui.core"
-    xmlns:t="sap.ui.table">
+    xmlns:core="sap.ui.core">
     <Page id="page2" title="{i18n>titleOrder}" showNavButton="true" navButtonPress="onNavBack" showHeader="true" enableScrolling="true" class="sapUiContentPadding">
         <VBox class="sapUiSmallMargin" id="VBoxId">
             <f:Form id="FormChange354" editable="true">
@@ -89,60 +88,78 @@
 
         <Button text="{i18n>btnNovoItem}" id="btnNovoItem" press="onNewItem" />   
 
-        	<t:Table id="TableItemsId" 
-                     rows="{Ordem>/toOVItem}" 
-                     selectionMode="MultiToggle" 		
-                     class="sapUiSmallMargin"
-                     rowMode="Fixed"
-                     threshold="10"
-                     enableBusyIndicator="true">
-				<t:columns>
-					<t:Column id="columnId1">
-                        <Label text="{i18n>item}" id="labelId1"/>
-                            <t:template>
-                                <Text text="{Ordem>ItemId}" id="textId1" />
-                            </t:template>
-					</t:Column>
-					<t:Column id="columnId2">
-                        <Label text="{i18n>material}" id="labelId2"/>
-                            <t:template>
-                                <Input value="{Ordem>Material}" id="textId2" valueLiveUpdate="true"/>
-                            </t:template>
-					</t:Column>
-					<t:Column id="columnId3">
-                        <Label text="{i18n>descricao}" id="labelId3"/>
-                            <t:template>
-                                <Input value="{Ordem>Descricao}" id="textId3" valueLiveUpdate="true"/>
-                            </t:template>
-					</t:Column>
-					<t:Column id="columnId4">
-                        <Label text="{i18n>quantidade}" id="labelId4"/>
-                            <t:template>
-                                <Input value="{Ordem>Quantidade}" id="QuantidadeId" liveChange="onChangePrice" valueLiveUpdate="true"/>
-                            </t:template>
-					</t:Column>
-                    <t:Column id="columnId5">
-                        <Label text="{i18n>precoUnitario}" id="labelId5"/>
-                            <t:template>
-                                <Input value="{Ordem>PrecoUni}" id="PrecoUnitarioId" valueLiveUpdate="true" liveChange="onChangePrice"/>
-                            </t:template>
-					</t:Column>
-                    <t:Column id="columnId6">
-                        <Label text="{i18n>precoTotal}" id="PrecoTotalId"/>
-                            <t:template>
-                                <Input value="{Ordem>PrecoTot}" id="textId6" editable="false" />
-                            </t:template>
-					</t:Column>
-                    <t:Column id="columnId7">
-                        <Label text="{i18n>opcao}" id="labelId7"/>
-                            <t:template>
-                                <Button id="btnDelete" icon="sap-icon://delete" press="onDeleteRow" />
-                            </t:template>
-					</t:Column>
-				</t:columns>
-			</t:Table>
+            <Table id="TableItemsId" 
+		       class="sapUIResponsiveMargin"
+			   width="auto"
+			   items="{path : 'Ordem>/toOVItem'}">
 
-            <Button id="btnCriarOrdemId" text="Criar" icon="sap-icon://create" press=".onCreateDeepOrder" />
+			   <columns>
+			   		<Column id="_IDGenColumn" hAlign="Begin"
+					         minScreenWidth="Small"
+							 demandPopin="true"
+							 width="0.005em">
+							 <Text id="_IDGenText18" text="Item"/>
+					</Column>
+
+					<Column id="_IDGenColumn13" hAlign="Begin"
+					         minScreenWidth="Small"
+							 demandPopin="true"
+							 width="1em">
+							 <Text id="_IDGenText19" text="Material"/>
+					</Column>
+
+					<Column id="_IDGenColumn14" hAlign="Begin"
+					         minScreenWidth="Small"
+							 demandPopin="true"
+							 width="1em">
+							 <Text id="_IDGenText20" text="Descrição"/>
+					</Column>
+
+					<Column id="_IDGenColumn15" hAlign="Begin"
+					         minScreenWidth="Small"
+							 demandPopin="true"
+							 width="1em">
+							 <Text id="_IDGenText21" text="Quantidade"/>
+					</Column>
+
+					<Column id="_IDGenColumn16" hAlign="Begin"
+					         minScreenWidth="Small"
+							 demandPopin="true"
+							 width="1em">
+							 <Text id="_IDGenText22" text="Preço Unitário"/>
+					</Column>
+
+					<Column id="_IDGenColumn17" hAlign="Begin"
+					         minScreenWidth="Small"
+							 demandPopin="true"
+							 width="1em">
+							 <Text id="_IDGenText23" text="Preço Total"/>
+					</Column>
+
+					<Column id="_IDGenColumn18" hAlign="Begin"
+					         minScreenWidth="Small"
+							 demandPopin="true"
+							 width="1em">
+							 <Text id="_IDGenText24" text="Options"/>
+					</Column>
+
+			   </columns>
+
+			   <items>
+					<ColumnListItem id="_IDGenColumnListItem1" type="Inactive" press="">
+						<Text text="{Ordem>ItemId}"       id="textId1" />
+						<Input value="{Ordem>Material}"   id="textId2"         valueLiveUpdate="true"/>
+						<Input value="{Ordem>Descricao}"  id="textId3"         valueLiveUpdate="true"/>
+						<Input value="{Ordem>Quantidade}" id="QuantidadeId"    valueLiveUpdate="true" liveChange="onChangePrice" />
+						<Input value="{Ordem>PrecoUni}"   id="PrecoUnitarioId" valueLiveUpdate="true" liveChange="onChangePrice"/>
+						<Input value="{Ordem>PrecoTot}"   id="textId6" editable="false" />
+							<HBox id="__IDGenHBox" wrap="Wrap">
+                                <Button id="btnDelete" icon="sap-icon://delete" press="onDeleteRow" />
+							</HBox>       		
+				    </ColumnListItem>
+			   </items>
+		</Table>
+            <Button id="btnCriarOrdemId" text="Criar" icon="sap-icon://create" press=".onCreateDeepOrder" class="sapUiTinyMarginBegin"/>
             <Button id="btnDeleteForm" text="Deletar" icon="sap-icon://delete" press=".onDelete" class="sapUiTinyMarginBegin"/>
     </Page>
 </mvc:View>
