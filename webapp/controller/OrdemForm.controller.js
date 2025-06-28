@@ -9,150 +9,141 @@ sap.ui.define(
       formatter: formatter,
 
       onInit() {
+        const oView       = this.getView();
+        const oRouter     = sap.ui.core.UIComponent.getRouterFor(this);
+        
+        // Cria e associa o modelo de dados principal da ordem (do tipo JSONModel)
+        const oOrderModel = new sap.ui.model.json.JSONModel(this._createEmptyOrderObject());
 
-       // x = 10;
-        var oView = this.getView();
-        var oData = new sap.ui.model.json.JSONModel({
-          OrdemId: "",
-          DataCriacao: null,
-          CriadoPor: "",
-          ClienteId: "",
-          TotalItens: "",
-          TotalFrete: "",
-          TotalOrdem: "",
-          Status: "",
-          toOVItem: [],
-        });
+        oOrderModel.setDefaultBindingMode(sap.ui.model.BindingMode.TwoWay);
+        oView.setModel(oOrderModel, "Ordem");
 
-        oData.setDefaultBindingMode(sap.ui.model.BindingMode.TwoWay);
-        oView.setModel(oData, "Ordem");
-
-        const oDataCombo = new sap.ui.model.json.JSONModel({
+        // Cria o modelo de status para o ComboBox de status da ordem
+        const oStatusLista = new sap.ui.model.json.JSONModel({
           statusLista: [
-            { key: "Novo", status: "Novo" },
+            { key: "Novo",      status: "Novo"      },
             { key: "Fornecido", status: "Fornecido" },
-            { key: "Faturado", status: "Faturado" },
+            { key: "Faturado",  status: "Faturado"  },
             { key: "Cancelado", status: "Cancelado" },
           ],
         });
-        oView.byId("ComboId").setModel(oDataCombo, "Lista");
 
-        var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
+        // Associa o modelo ao ComboBox de status
+        oView.byId("ComboId").setModel(oStatusLista, "Lista");
+ 
+        // Associa o modelo ao ComboBox de status
         oRouter.getRoute("RouteToOrderEditScreen").attachPatternMatched(this._onRouteMatchedEdit, this);
         oRouter.getRoute("RouteToOrderCreateScreen").attachPatternMatched(this._onRouteMatchedCreate, this);
-        oRouter.getRoute("RouteView1").attachPatternMatched(this._onRouteMatchedMain, this);
+        oRouter.getRoute("RouteToOrderListView").attachPatternMatched(this._onRouteMatchedMain, this);
       },
 
       _onRouteMatchedMain: function () {
-        var oModel = null;
-        oModel = new sap.ui.model.json.JSONModel(this.createEmptyOrderObject());
+        // Cria um novo modelo JSON com os dados vazios da ordem
+        const oModel = new sap.ui.model.json.JSONModel(this._createEmptyOrderObject());
         oModel.setDefaultBindingMode(sap.ui.model.BindingMode.TwoWay);
+
+        // Associa o modelo à view
         this.getView().setModel(oModel, "Ordem");
+
+        // Ativa edição para os campos de data de criação e criado por
+        this.byId("DTP1").setEditable(true);
+        this.byId("criadoPor").setEditable(true);
       },
 
       _onRouteMatchedEdit: function (oEvent) {
-        var that = this;
-        var oView    = this.getView();
-        var ordemId = oEvent.getParameter("arguments").ordemId;
-        var oModel = this.getOwnerComponent().getModel();
-        var oModel1  = null;
+        const oView   = this.getView();
+        const ordemId = oEvent.getParameter("arguments").ordemId;
+        const oModel  = this.getOwnerComponent().getModel();
 
+        // Define campos específicos como não editáveis
         this.byId("DTP1").setEditable(false);
         this.byId("criadoPor").setEditable(false);
         this.getView().byId("btnCriarOrdemId").setText("Salvar");
 
-        oModel1 = new sap.ui.model.json.JSONModel(this.createEmptyOrderObject());
-        oModel1.setDefaultBindingMode(sap.ui.model.BindingMode.TwoWay);
+        const oOrderModel = new sap.ui.model.json.JSONModel(this._createEmptyOrderObject());
+        oOrderModel.setDefaultBindingMode(sap.ui.model.BindingMode.TwoWay);
 
         oView.setBusy(true);
 
-       // cabeçalho
-                oModel.read("/OVCabSet("+parseInt(ordemId, 10)+")",{
-                    success: function(oOrdem, oResponse){
-                        // items
-                        oModel.read("/OVCabSet("+parseInt(ordemId, 10)+")/toOVItem",{
-                            success: function(oData, oResponse){
-                              const formatador = new Intl.NumberFormat("pt-BR", {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2,
-                              });
+       // Carrega os dados do cabeçalho da ordem
+        oModel.read("/OVCabSet("+parseInt(ordemId, 10)+")",{
+            success: (oOrdem) => {
+                // Carrega os itens associados à ordem
+                oModel.read("/OVCabSet("+parseInt(ordemId, 10)+")/toOVItem",{
+                    success: (oData) => {
+                      const formatador = new Intl.NumberFormat("pt-BR", {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                      });
+                      
+                      // Formata os valores monetários dos itens
+                      oData.results.forEach(item => {
+                        item.PrecoTot = formatador.format(item.PrecoTot);
+                        item.PrecoUni = formatador.format(item.PrecoUni);
+                      });
 
-                              oData.results.forEach(item => {
-                                item.PrecoTot = formatador.format(item.PrecoTot);
-                                item.PrecoUni = formatador.format(item.PrecoUni);
-                              });
+                      oOrdem.toOVItem = oData.results;
 
-                              oOrdem.toOVItem = oData.results;
+                      // Formata campos do cabeçalho
+                      oOrdem.TotalFrete = formatador.format(oOrdem.TotalFrete);
+                      oOrdem.TotalItens = formatador.format(oOrdem.TotalItens);
+                      oOrdem.TotalOrdem = formatador.format(oOrdem.TotalOrdem);
 
-                              oOrdem.TotalFrete = formatador.format(oOrdem.TotalFrete);
-                              oOrdem.TotalItens = formatador.format(oOrdem.TotalItens);
-                              oOrdem.TotalOrdem = formatador.format(oOrdem.TotalOrdem);
-
-                              oModel1.setData(oOrdem);
-
-                              oView.setModel(oModel1, "Ordem");
-                                
-                              //that.recalcOrder();
-                              oView.setBusy(false);
-                            },
-                            
-                            error: function(oResponse){
-                                var oError = JSON.parse(oResponse.responseText);
-                                MessageToast.show(oError.error.message.value);
-                                oView.setBusy(false);
-                            }
-                        });
+                      // Atualiza o modelo com os dados carregados
+                      oOrderModel.setData(oOrdem);
+                      oView.setModel(oOrderModel, "Ordem");
+                        
+                      oView.setBusy(false);
                     },
-                    error: function(oResponse){
-                        var oError = JSON.parse(oResponse.responseText);
-                        MessageToast.show(oError.error.message.value);
-                        oView.setBusy(false);
+                    
+                    error: (oResponse) =>{
+                      this._showODataError(oResponse);
+                      oView.setBusy(false);
                     }
                 });
-              //oModel.read("/OVCabSet(OrdemId=" + parseInt(ordemId, 10) + ")?$expand=toOVItem&$format=json​", {
-              /*oModel.read("/OVCabSet(1)?$expand=toOVItem​", {
-                sucess: function(oOdata) {
-                  oModel1.setData(oOdata);
-                  oView.setModel(oModel1);
-                  that.recalcOrder();
-
-                  oView.setBusy(false);
-                },
-                error: function(oResponse) {
-                      var oError = JSON.parse(oResponse.responseText);
-                      MessageToast.show(oError.error.message.value);
-                      oView.setBusy(false);
-                }
-              })
-            },*/
             },
+            error: (oResponse) => {
+              this._showODataError(oResponse);
+              oView.setBusy(false);
+            }
+        });
+      },
 
-            createEmptyOrderObject: function(){
-                var oOrdem = {
-                    OrdemId: "",
-                    DataCriacao: null,
-                    CriadoPor: "",
-                    ClienteId: "",
-                    TotalItens: 0.0,
-                    TotalFrete: 0,
-                    TotalOrdem: 0.0,
-                    Status: "",
-                    toOVItem: []
-                };
-                return oOrdem;
-            },
+      _showODataError: function(oResponse) {
+        try {
+          const oError = JSON.parse(oResponse.responseText);
+          MessageToast.show(oError.error.message.value);
+        } catch {
+          MessageToast.show("Erro ao carregar dados.");
+        }
+      },
+
+      _createEmptyOrderObject: function(){
+          const oOrdem = {
+              OrdemId: "",
+              DataCriacao: null,
+              CriadoPor: "",
+              ClienteId: "",
+              TotalItens: 0.0,
+              TotalFrete: 0,
+              TotalOrdem: 0.0,
+              Status: "",
+              toOVItem: []
+          };
+          return oOrdem;
+      },
 
       _onRouteMatchedCreate: function (oEvent) {
         this.getView().byId("btnCriarOrdemId").setText("Criar");
       },
 
       onNavBack: function () {
-        const oHistory = sap.ui.core.routing.History.getInstance(this);
+        const oHistory      = sap.ui.core.routing.History.getInstance(this);
         const sPreviousHash = oHistory.getPreviousHash();
-
+        const oModel        = this.getView().getModel("Ordem");
         // Limpa o nó específico do model
 
-      var oData = new sap.ui.model.json.JSONModel({
+        const oData = new sap.ui.model.json.JSONModel({
           OrdemId: "",
           DataCriacao: null,
           CriadoPor: "",
@@ -164,32 +155,27 @@ sap.ui.define(
           toOVItem: [],
         });
 
-
-        var oModel = this.getView().getModel("Ordem");
-
         oModel.setProperty("Ordem", oData);
 
         if (sPreviousHash !== undefined) {
           window.history.go(-1);
         } else {
-          sap.ui.core.UIComponent.getRouterFor(this).navTo("RouteView1");
+          sap.ui.core.UIComponent.getRouterFor(this).navTo("RouteToOrderListView");
         }
 
       },
 
       onNewItem: function () {
-        var oModel = this.getView().getModel("Ordem");
-        var aItens = oModel.getProperty("/toOVItem");
-
-        var itemId = aItens.length;
-
-        var oNovoItem = {
-          ItemId: itemId + 1,
-          Material: "",
-          Descricao: "",
-          Quantidade: "",
-          PrecoTot: "",
-          Options: "",
+        const oModel = this.getView().getModel("Ordem");
+        const aItens = oModel.getProperty("/toOVItem");
+        const itemId = aItens.length;
+        const oNovoItem = {
+          ItemId     : itemId + 1,
+          Material   : "",
+          Descricao  : "",
+          PrecoUni   : 0,
+          PrecoTot   : 0.00,
+          Options    : "",
         };
 
         aItens.push(oNovoItem);
@@ -197,106 +183,109 @@ sap.ui.define(
       },
 
       onDeleteRow: function (oEvent) {
-        var oModel = this.getView().getModel("Ordem");
-        var sPath = oEvent.getSource().getBindingContext("Ordem").getPath();
-        var aItems = oModel.getProperty("/toOVItem");
-        var iIndex = parseInt(sPath.split("/")[2]);
+        // Obtém o modelo de dados da ordem de venda
+        const oModel     = this.getView().getModel("Ordem");
 
-        var counter = 1;
+        // Caminho do item selecionado na tabela (ex: "/toOVItem/2")
+        const sItemPath  = oEvent.getSource().getBindingContext("Ordem").getPath();
 
-        //Remove o item do array
-        if (iIndex > -1) {
-          aItems.splice(iIndex, 1);
+        // Extrai o índice do item a ser removido
+        const iItemIndex = parseInt(sItemPath.split("/")[2]);
 
-          for (var i = 0; i < aItems.length; i++) {
-            aItems[i].ItemId = counter;
-            counter++;
-          }
+        // Obtém a lista atual de itens da ordem
+        const aOVItems   = oModel.getProperty("/toOVItem");
 
-          oModel.setProperty("/toOVItem", aItems);
+        // Verifica se o índice é válido
+        if (iItemIndex > -1) {
+          // Remove o item da lista
+          aOVItems.splice(iItemIndex, 1);
+
+          // Reatribui os IDs sequenciais (ItemId) para manter a consistência
+          aOVItems.forEach(function (item, index) {
+              item.ItemId = index + 1;
+          });
+
+          // Atualiza o modelo com a nova lista de itens
+          oModel.setProperty("/toOVItem", aOVItems);
         }
       },
 
       parseBRNumber: function (valor) {
-        return parseFloat(
-          (valor || "").toString().replace(/\./g, "").replace(",", ".")
-        );
-      },
+          // Garante que o valor seja uma string para aplicar substituições         
+          let sValor = (valor || "").toString();
 
-      formatDateToTimestampSAP: function (date) {
-        if (!(date instanceof Date)) date = new Date(date);
-        if (isNaN(date)) return "";
+          // Remove os pontos de milhar e troca a vírgula decimal por ponto
+          sValor = sValor.replace(/\./g, "").replace(",", ".");
 
-        const pad = (n) => n.toString().padStart(2, "0");
-
-        const yyyy = date.getFullYear();
-        const MM = pad(date.getMonth() + 1);
-        const dd = pad(date.getDate());
-        const hh = pad(date.getHours());
-        const mm = pad(date.getMinutes());
-        const ss = pad(date.getSeconds());
-
-        return `${yyyy}${MM}${dd}${hh}${mm}${ss}`;
+          // Converte para float
+          return parseFloat(sValor);
       },
 
       onChangePrice: function (oEvent) {
-        var _oInput = oEvent.getSource();
-        var val = _oInput.getValue();
-        var sId = _oInput.getId();
-
-        var oModel = this.getView().getModel("Ordem");
-
+        const oInput  = oEvent.getSource();
+        const sId     = oInput.getId();
+        const oModel  = this.getView().getModel("Ordem");
+        let sValueRaw = oInput.getValue();
+        
+        // Se for campo de quantidade, redireciona para outro handler
         if (sId.includes("QuantidadeId")) {
           this.onChangeValor(oEvent);
           return;
         }
 
-        val = val.replace(/[^\d]/g, "");
+        // Limpa caracteres não numéricos
+        let sValue = sValueRaw.replace(/[^\d]/g, "");
 
-        if (val == "") {
-          _oInput.setValue(val);
-          return;
+        // Se valor estiver vazio, apenas limpa o campo
+        if (!sValue) {
+          oInput.setValue("");
         }
 
-        // removendo zero a esquerda
-        val = val.replace(/^0+/, "");
+        // Remove zeros à esquerda
+        sValue = sValue.replace(/^0+/, "");
 
-        var length = val.length;
+        const length = sValue.length;
+        let formattedValue;
 
         if (length == 1) {
-          val = "0,0" + val;
+          formattedValue = "0,0" + sValue;
         } else if (length == 2) {
-          val = "0," + val;
-        } else if (length > 2) {
-          val = val.slice(0, length - 2) + "." + val.slice(-2);
-          val = formatter.formatPrice(val);
+          formattedValue = "0," + sValue;
         } else {
-          val = "";
+          const valorNumerico = sValue.slice(0, length - 2) + "." + sValue.slice(-2);
+          formattedValue  = formatter.formatPrice(valorNumerico);
         }
 
-        _oInput.setValue(val);
+        // Atualiza o valor formatado no input
+        oInput.setValue(formattedValue);
 
+        if (sId.includes("PrecoUnitarioId") && !sValue) {
+          oInput.setValue(0);
+        }
+        if (sId.includes("QuantidadeId") && !sValue) {
+          oInput.setValue(0);
+        }
+        // Caso o campo seja de frete, recalcula o total da ordem
         if (sId.includes("totalFrete")) {
 
-          let aItems = oModel.getProperty("/toOVItem") || [];
-          let totalItens = 0;
-          let totalOrdem = 0;
-          let totalFrete = 0;
+          const aItems = oModel.getProperty("/toOVItem") || [];
 
+          let totalItens = 0;
+          
           aItems.forEach((item) => {
-            const valor = this.parseBRNumber(item.PrecoTot);
-            if (!isNaN(valor)) {
-              totalItens += valor;
+            const preco = this.parseBRNumber(item.PrecoTot);
+            if (!isNaN(preco)) {
+              totalItens += preco;
             };
           });
 
-          totalFrete = this.parseBRNumber(val);
+          let totalFrete = this.parseBRNumber(formattedValue);
 
           if (isNaN(totalFrete)) {
             totalFrete = 0;
           };
 
-          totalOrdem = totalFrete + totalItens;
+          const totalOrdem = totalFrete + totalItens;
           const totalOrdemFormatado = new Intl.NumberFormat("pt-BR", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
@@ -307,96 +296,80 @@ sap.ui.define(
           return;
         }
 
+        // Caso seja preço unitário, recalcula valor total do item
         if (sId.includes("PrecoUnitarioId")) {
-          this.onChangeValor(oEvent); // chama o cálculo
+          this.onChangeValor(oEvent);
         }
       },
 
       onCreateDeepOrder: function () {
-        var oHash = sap.ui.core.routing.HashChanger.getInstance().getHash();
-        let criar;
-        if(oHash.includes("editar")) {
-          criar = false;
-        } else if (oHash.includes("criar")) {
-          criar = true;
-        };
+        const oView       = this.getView();
+        const oModel      = oView.getModel();
+        const oOrdemModel = oView.getModel("Ordem");
+        const that        = this;
 
-        var that = this;
+        // Verifica se a operação é de criação ou edição com base no hash da URL
+        const sHash  = sap.ui.core.routing.HashChanger.getInstance().getHash();
+        const bCriar = sHash.includes("criar");
 
-        var oModel = this.getView().getModel();
+       // Clona os dados do modelo "Ordem" para evitar modificações diretas
+        const oData = JSON.parse(JSON.stringify(oOrdemModel.getData()));
 
+        // Limpa identificador da ordem, se for criação
+        if (bCriar) {
+            delete oData.OrdemId;
+        }
 
-
-        var oData = JSON.parse(
-          JSON.stringify(this.getView().getModel("Ordem").getData())
-        );
-
-        var ordemIdValue = this.getView()
-          .getModel("Ordem")
-          .getProperty("/OrdemId");
-
-        oModel.setProperty("/toOVItem", ordemIdValue);
-
-        // Limpa campos visuais dos itens
+        // Limpa campos visuais desnecessários dos itens
         oData.toOVItem = oData.toOVItem.map((item) => {
-          let cleaned = { ...item };
-          delete cleaned.Opcoes; // ou qualquer outro campo visual
+          const cleaned = { ...item };
+          delete cleaned.Opcoes;
+          delete cleaned.Options;
           return cleaned;
         });
 
-        if(criar) {
-          delete oData.OrdemId;
-        };
+        // Conversões e validações de campos numéricos
+        oData.TotalItens  = this.parseBRNumber(oData.TotalItens).toFixed(2);
+        oData.TotalFrete  = this.parseBRNumber(oData.TotalFrete).toFixed(2);
+        oData.TotalOrdem  = this.parseBRNumber(oData.TotalOrdem).toFixed(2);
+        oData.ClienteId   = parseInt(oData.ClienteId, 10);
+        oData.DataCriacao = new Date();
 
-        oData.TotalItens = this.parseBRNumber(oData.TotalItens).toFixed(2);
-        oData.TotalFrete = this.parseBRNumber(oData.TotalFrete).toFixed(2);
-        oData.TotalOrdem = this.parseBRNumber(oData.TotalOrdem).toFixed(2);
-
-        oData.ClienteId = parseInt(oData.ClienteId);
-
-        oData.DataCriacao = new Date(); // sem formatação
-
-        oData.toOVItem.forEach(function (item) {
-          item.Quantidade = parseFloat(
-            that.parseBRNumber(item.Quantidade).toFixed(2)
-          );
-
-          item.PrecoUni = that.parseBRNumber(item.PrecoUni).toFixed(2);
-          item.PrecoTot = that.parseBRNumber(item.PrecoTot).toFixed(2);
-
-          delete item.Options;
+        // Conversão dos campos numéricos dos itens
+        oData.toOVItem.forEach((item) => {
+          item.Quantidade = parseFloat(this.parseBRNumber(item.Quantidade).toFixed(2));
+          item.PrecoUni   = that.parseBRNumber(item.PrecoUni).toFixed(2);
+          item.PrecoTot   = that.parseBRNumber(item.PrecoTot).toFixed(2);        
         });
 
-        this.getView().setBusy(true);
+        // Ativa o busy indicator da view
+        oView.setBusy(true);
 
+        // Envia os dados via deep insert
         oModel.create("/OVCabSet", oData, {
-          success: function (oData2, result) {
-            let oModel = that.getView().getModel("Ordem");
-            that.getView().setBusy(false);
-            oModel.setProperty("/OrdemId", oData2.OrdemId);  
+          success: function (oResponseData) {
+            const sMensagem = bCriar?"Registro cadastrado com sucesso!":"Registro modificado com sucesso!";
 
-
-          if(criar) {
-            MessageToast.show("Registro cadastrado com sucesso!");
-          } else {
-            MessageToast.show("Registro modificado com sucesso!");
-          }
-            
-            console.log(result);
+            oOrdemModel.setProperty("/OrdemId", oResponseData.OrdemId);       
+            oView.setBusy(false);
+            MessageToast.show(sMensagem);
           },
 
-          error: function (error) {
-            that.getView().setBusy(false);
+          error: function (oError) {
+            oView.setBusy(false);
             MessageToast.show("Erro no cadastro!");
-            console.log(error);
           },
         });
       },
-
+      
       onChangeValor: function (oEvent) {
-        const oInput = oEvent.getSource();
-        const oModel = this.getView().getModel("Ordem");
-        const oContext = oInput.getBindingContext("Ordem");
+        const oInput     = oEvent.getSource();
+        const oModel     = this.getView().getModel("Ordem");
+        const oContext   = oInput.getBindingContext("Ordem");
+        const formatador = new Intl.NumberFormat("pt-BR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
 
         // Sai da função se o contexto estiver ausente
         if (!oContext) return;
@@ -411,20 +384,17 @@ sap.ui.define(
           );
 
         // Converte quantidade e preço unitário para número
-        const qtd = parseBRNumber(oData.Quantidade);
+        let qtd = parseBRNumber(oData.Quantidade);
         const preco = parseBRNumber(oData.PrecoUni);
 
         // Se os dois valores forem válidos, calcula o total da linha
-        if (!isNaN(qtd) && !isNaN(preco)) {
+        //if (!isNaN(qtd) && !isNaN(preco)) {
+          if (!isNaN(preco)) {
+            if(isNaN(qtd)) {qtd = 0}
           const total = qtd * preco;
 
           // Formata o total da linha no formato brasileiro e atualiza o modelo
-          const totalFormatado = new Intl.NumberFormat("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          }).format(total);
-
-          oModel.setProperty(sPath + "/PrecoTot", totalFormatado);
+          oModel.setProperty(sPath + "/PrecoTot", formatador.format(total));
 
           // Obtém os itens da tabela para somar todos os totais
           const aItems = oModel.getProperty("/toOVItem") || [];
@@ -437,27 +407,20 @@ sap.ui.define(
             }
           });
 
-          // Atualiza o valor total dos itens no modelo, formatado
-          const totalItensFormatado = new Intl.NumberFormat("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          }).format(totalItens);
-          oModel.setProperty("/TotalItens", totalItensFormatado);
+          // Atualiza o valor total dos itens formatado no modelo 
+          oModel.setProperty("/TotalItens", formatador.format(totalItens));
 
           // Converte o total do frete para número e calcula o total geral
           const totalFrete = parseBRNumber(oModel.getProperty("/TotalFrete"));
           const totalOrdem = totalItens + (isNaN(totalFrete) ? 0 : totalFrete);
 
-          const totalOrdemFormatado = new Intl.NumberFormat("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          }).format(totalOrdem);
-          oModel.setProperty("/TotalOrdem", totalOrdemFormatado);
+          // Converte o total da ordem para número e calcula o total geral
+          oModel.setProperty("/TotalOrdem", formatador.format(totalOrdem));
         } else {
           // Se não for possível calcular, limpa o total da linha
           oModel.setProperty(sPath + "/PrecoTot", "");
         }
-      },
+      }
     });
   }
 );

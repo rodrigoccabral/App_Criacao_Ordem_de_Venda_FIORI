@@ -8,25 +8,25 @@
     <Page id="page" title="{i18n>titleMain}">
 
     <content>
-        <fb:FilterBar id="filterBarId" reset="onFilterReset"  search=".onFilterSearch">
+        <fb:FilterBar id="filterBarId" search=".onFilterSearch">
 		
             <fb:filterGroupItems>
 					<fb:FilterGroupItem id="_IDGenFilterItem" name="OrdemId" label="Id Ordem"  groupName="__basic" visibleInFilterBar="true">
 						<fb:control>
-							<Input id="OVCab.OrdemId" value="{filter>/OrdemId}"/>
+							<Input id="OVCab.OrdemId" value="{filterModel>/OrdemId}"/>
 						</fb:control>
 					</fb:FilterGroupItem>
 
 					<fb:FilterGroupItem id="_IDGenFilterItem1" name="ClienteId" label="Id Cliente"  groupName="__basic2" visibleInFilterBar="true">
 						<fb:control>
-							<Input id="OVCab.ClienteId" value="{filter>/ClienteId}"/>
+							<Input id="OVCab.ClienteId" value="{filterModel>/ClienteId}"/>
 						</fb:control>
 					</fb:FilterGroupItem>
             
 
                     <fb:FilterGroupItem id="_IDGenFilterItem2" name="Ordenacao" label="Ordenacao"  groupName="__basic3" visibleInFilterBar="true">
 						<fb:control>
-							<Select id="OrdenacaoCampo" selectedKey="{filter>/OrdenacaoCampo}">
+							<Select id="OrdenacaoCampo" selectedKey="{filterModel>/OrdenacaoCampo}">
 								<items>
 
 									<core:Item id="_IDGenItem2" text="OrdemId" key="OrdemId"/>
@@ -45,7 +45,7 @@
 
                     <fb:FilterGroupItem id="_IDGenFilterItem3" name="Tipo" label="Tipo"  groupName="__basic4" visibleInFilterBar="true">
 						<fb:control>
-							<Select id="OrdenacaoTipo" selectedKey="{filter>/OrdenacaoTipo}">
+							<Select id="OrdenacaoTipo" selectedKey="{filterModel>/OrdenacaoTipo}">
 								<items>
 									<core:Item id="_IDGenItem11" text="ASC" key="ASC"/>
 									<core:Item id="_IDGenItem12" text="DESC" key="DESC"/>
@@ -56,13 +56,13 @@
 
                     <fb:FilterGroupItem id="_IDGenFilterItem4" name="LimiteId" label="Limite"  groupName="__basic5" visibleInFilterBar="true">
 						<fb:control>
-							<Input id="LimiteInputId" value="{filter>/Limite}"/>
+							<Input id="LimiteInputId" value="{filterModel>/Limite}"/>
 						</fb:control>
 					</fb:FilterGroupItem>
 
                     <fb:FilterGroupItem id="_IDGenFilterItem5" name="IgnorarId" label="Ignorar"  groupName="__basic6" visibleInFilterBar="true">
 						<fb:control>
-							<Input id="IgnorarInputId" value="{filter>/Ignorar}"/>
+							<Input id="IgnorarInputId" value="{filterModel>/Ignorar}"/>
 						</fb:control>
 					</fb:FilterGroupItem>
                 </fb:filterGroupItems>
@@ -73,7 +73,7 @@
 			<Button id="btnFornecer" text="Fornecido"       press=".onChangeStatus('Fornecido')" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
 			<Button id="btnFaturar"  text="Faturado"        press=".onChangeStatus('Faturado')"  class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
 			<Button id="btnCancelar" text="Cancelado"       press=".onChangeStatus('Cancelado')" class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
-        	<Button id="btnCriar"    text="{i18n>btnCriar}" press=".onClickMain"                 class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
+        	<Button id="btnCriar"    text="{i18n>btnCriar}" press=".onOrderAction"               class="sapUiSmallMarginEnd sapUiSmallMarginTop"/>
 		</HBox>
 		
 		<Table id="orderListTable" 
@@ -88,67 +88,76 @@
 			   </headerToolbar>
 
 			   <columns>
-			   		<Column id="_IDGenColumn1" hAlign="Begin"
-					         minScreenWidth="Small"
-							 demandPopin="true"
-							 width="1em">
-							 <Text id="_IDGenText1" text="Id Ordem"/>
+			   		<Column id="_IDGenColumn1" 
+							hAlign="Begin"
+					        minScreenWidth="Small"
+							demandPopin="true"
+							width="1em">
+							<Text id="_IDGenText1" text="Id Ordem"/>
 					</Column>
 
-					<Column id="_IDGenColumn2" hAlign="Begin"
-					         minScreenWidth="Small"
-							 demandPopin="true"
-							 width="1em">
-							 <Text id="_IDGenText2" text="Data Criação"/>
+					<Column id="_IDGenColumn2" 
+							hAlign="Begin"
+					        minScreenWidth="Small"
+							demandPopin="true"
+							width="1em">
+							<Text id="_IDGenText2" text="Data Criação"/>
 					</Column>
 
-					<Column id="_IDGenColumn3" hAlign="Begin"
-					         minScreenWidth="Small"
-							 demandPopin="true"
-							 width="1em">
-							 <Text id="_IDGenText3" text="Id Cliente"/>
+					<Column id="_IDGenColumn3" 
+							hAlign="Begin"
+					        minScreenWidth="Small"
+							demandPopin="true"
+							width="1em">
+							<Text id="_IDGenText3" text="Id Cliente"/>
 					</Column>
 
-					<Column id="_IDGenColumn4" hAlign="Begin"
-					         minScreenWidth="Small"
-							 demandPopin="true"
-							 width="1em">
-							 <Text id="_IDGenText4" text="Criado Por"/>
+					<Column id="_IDGenColumn4" 
+							hAlign="Begin"
+					        minScreenWidth="Small"
+							demandPopin="true"
+							width="1em">
+							<Text id="_IDGenText4" text="Criado Por"/>
 					</Column>
 
-					<Column id="_IDGenColumn5" hAlign="Begin"
-					         minScreenWidth="Small"
-							 demandPopin="true"
-							 width="1em">
-							 <Text id="_IDGenText5" text="Total Itens"/>
+					<Column id="_IDGenColumn5" 
+							hAlign="Begin"
+					        minScreenWidth="Small"
+							demandPopin="true"
+							width="1em">
+							<Text id="_IDGenText5" text="Total Itens"/>
 					</Column>
 
-					<Column id="_IDGenColumn6" hAlign="Begin"
-					         minScreenWidth="Small"
-							 demandPopin="true"
-							 width="1em">
-							 <Text id="_IDGenText6" text="Total Frete"/>
+					<Column id="_IDGenColumn6" 
+							hAlign="Begin"
+					        minScreenWidth="Small"
+							demandPopin="true"
+							width="1em">
+							<Text id="_IDGenText6" text="Total Frete"/>
 					</Column>
 
-					<Column id="_IDGenColumn7" hAlign="Begin"
-					         minScreenWidth="Small"
-							 demandPopin="true"
-							 width="1em">
-							 <Text id="_IDGenText7" text="Total Ordem"/>
+					<Column id="_IDGenColumn7" 
+							hAlign="Begin"
+					        minScreenWidth="Small"
+							demandPopin="true"
+							width="1em">
+							<Text id="_IDGenText7" text="Total Ordem"/>
 					</Column>
 
-					<Column id="_IDGenColumn8" hAlign="Begin"
-					         minScreenWidth="Small"
-							 demandPopin="true"
-							 width="1em">
-							 <Text id="_IDGenText8" text="Status"/>
+					<Column id="_IDGenColumn8" 
+							hAlign="Begin"
+					        minScreenWidth="Small"
+							demandPopin="true"
+							width="1em">
+							<Text id="_IDGenText8" text="Status"/>
 					</Column>
 
-					<Column id="_IDGenColumn9" hAlign="Begin"
-					         minScreenWidth="Small"
-							 demandPopin="true"
-							 width="1em">
-							 <Text id="__IDGenText9" text="Opções"/>
+					<Column id="_IDGenColumn9" 
+							hAlign="Begin"
+					        minScreenWidth="Small"
+							demandPopin="true"
+							width="1em">
+							<Text id="__IDGenText9" text="Opções"/>
 					</Column>
 			   </columns>
 
@@ -163,8 +172,8 @@
 						<Text id="_IDGenText16" text="{orderTableModel>TotalOrdem}"/>
 						<Text id="_IDGenText17" text="{orderTableModel>Status}"/>		
 							<HBox id="_IDGenHBox" wrap="Wrap">
-                                <Button id="btnEditar" icon="sap-icon://edit" press=".onClickMain" class="sapUiTinyMarginBegin"/>
-								<Button id="btnDeleteList" icon="sap-icon://delete" press=".onDelete" class="sapUiTinyMarginBegin"/>
+                                <Button id="btnEditar"     icon="sap-icon://edit"   press=".onOrderAction" class="sapUiTinyMarginBegin"/>
+								<Button id="btnDeleteList" icon="sap-icon://delete" press=".onDelete"      class="sapUiTinyMarginBegin"/>
 							</HBox>       		
 				    </ColumnListItem>
 			   </items>

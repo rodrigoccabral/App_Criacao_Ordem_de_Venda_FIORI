@@ -90,10 +90,10 @@
       },
       "routes": [
         {
-          "name": "RouteView1",
+          "name": "RouteToOrderListView",
           "pattern": ":?query:",
           "target": [
-            "TargetView1"
+            "TargetToOrderListView"
           ]
         },
         {
@@ -112,7 +112,7 @@
         }
       ],
       "targets": {
-        "TargetView1": {
+        "TargetToOrderListView": {
           "id": "OrdemList",
           "name": "OrdemList"
         },

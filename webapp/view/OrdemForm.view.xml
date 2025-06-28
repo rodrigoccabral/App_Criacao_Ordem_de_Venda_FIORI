@@ -1,7 +1,6 @@
 <mvc:View controllerName="project1.controller.OrdemForm"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
-    xmlns:l="sap.ui.layout"
 	xmlns:f="sap.ui.layout.form"
     xmlns:core="sap.ui.core">
     <Page id="page2" title="{i18n>titleOrder}" showNavButton="true" navButtonPress="onNavBack" showHeader="true" enableScrolling="true" class="sapUiContentPadding">
@@ -61,7 +60,7 @@
                             </f:FormElement>
                             <f:FormElement label="{i18n>totalFrete}" id="totalFreteId">
                                 <f:fields>
-                                    <Input value="{Ordem>/TotalFrete}" id="totalFrete" liveChange="onChangePrice"/>
+                                    <Input value="{Ordem>/TotalFrete}" id="totalFrete" liveChange=".onChangePrice"/>
                                 </f:fields>
                             </f:FormElement>
                             <f:FormElement label="{i18n>totalOrdem}" id="totalOrdemId">
@@ -86,7 +85,7 @@
             </f:Form>
 	    </VBox>  
 
-        <Button text="{i18n>btnNovoItem}" id="btnNovoItem" press="onNewItem" />   
+        <Button text="{i18n>btnNovoItem}" id="btnNovoItem" press=".onNewItem" />   
 
             <Table id="TableItemsId" 
 		       class="sapUIResponsiveMargin"
@@ -150,11 +149,11 @@
 						<Text text="{Ordem>ItemId}"       id="textId1" />
 						<Input value="{Ordem>Material}"   id="textId2"         valueLiveUpdate="true"/>
 						<Input value="{Ordem>Descricao}"  id="textId3"         valueLiveUpdate="true"/>
-						<Input value="{Ordem>Quantidade}" id="QuantidadeId"    valueLiveUpdate="true" liveChange="onChangePrice" />
-						<Input value="{Ordem>PrecoUni}"   id="PrecoUnitarioId" valueLiveUpdate="true" liveChange="onChangePrice"/>
+						<Input value="{Ordem>Quantidade}" id="QuantidadeId"    valueLiveUpdate="true" liveChange=".onChangePrice" />
+						<Input value="{Ordem>PrecoUni}"   id="PrecoUnitarioId" valueLiveUpdate="true" liveChange=".onChangePrice"/>
 						<Input value="{Ordem>PrecoTot}"   id="textId6" editable="false" />
 							<HBox id="__IDGenHBox" wrap="Wrap">
-                                <Button id="btnDelete" icon="sap-icon://delete" press="onDeleteRow" />
+                                <Button id="btnDelete" icon="sap-icon://delete" press=".onDeleteRow" />
 							</HBox>       		
 				    </ColumnListItem>
 			   </items>

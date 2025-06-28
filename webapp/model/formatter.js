@@ -40,6 +40,15 @@ sap.ui.define([
                 break;
             }
             return sColor;
+        },
+
+        formatQuantidade: function (valor) {
+            return valor || 0; // Se valor for undefined ou "", retorna "0"
+        },
+
+        formatPreco: function (valor) {
+            let num = parseFloat(valor);
+            return isNaN(num) ? "0,00" : num.toFixed(2).replace(".", ",");
         }
 
     };

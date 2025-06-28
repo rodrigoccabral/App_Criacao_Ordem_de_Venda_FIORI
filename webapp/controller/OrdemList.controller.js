@@ -1,238 +1,236 @@
 sap.ui.define(
-  [
-    "project1/controller/BaseController",
-    "sap/m/MessageToast",
-    "../model/formatter"],
-   (Controller, MessageToast, formatter) => {
+  ["project1/controller/BaseController",
+   "sap/m/MessageToast",
+   "../model/formatter"],
+   (BaseController, MessageToast, formatter) => {
   "use strict";
 
-  return Controller.extend("project1.controller.OrdemList", {
+  return BaseController.extend("project1.controller.OrdemList", {
     formatter: formatter,
     
     onInit() {
-
-      var oModel = new sap.ui.model.json.JSONModel();
-      oModel.setData([]);
-      this.getView().setModel(oModel, "orderTableModel");
-      oModel.setDefaultBindingMode(sap.ui.model.BindingMode.TwoWay);
-
-      var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
-      oRouter.getRoute("RouteView1").attachPatternMatched(this._onRouteMainView, this);
-
-      var oView = this.getView();
-
-      var oFModel = new sap.ui.model.json.JSONModel({
-                    "OrdemId": "",
-                    "DataCriacao": null,
-                    "CriadoPor": "",
-                    "ClienteId": "",
-                    "TotalItens": 0,
-                    "TotalFrete": 0,
-                    "TotalOrdem": 0,
-                    "Status": "",
-                    "OrdenacaoCampo": "OrdemId",
-                    "OrdenacaoTipo": "ASC",
-                    "Limite": 25,
-                    "Ignorar": 0
-      });
-
-      oView.setModel(oFModel, "filter");
-
-    },
-
-    onFilterReset: function(){
-    
-    },
-
-    _onRouteMainView : function() {
+      const oView = this.getView();
       
-      var oView = this.getView();
-      var oModel = this.getOwnerComponent().getModel();
+      // Obtenção do router da aplicação e associação do evento de navegação
+      const oRouter = sap.ui.core.UIComponent.getRouterFor(this);
+      oRouter.getRoute("RouteToOrderListView").attachPatternMatched(this._onRouteToOrderListView, this);
 
-      var oModelData = new sap.ui.model.json.JSONModel();
-      oModelData.setData([]);
-      oModelData.setDefaultBindingMode(sap.ui.model.BindingMode.TwoWay);
+      // Model para os filtros utilizados na tela
+      const oFilterModel = new sap.ui.model.json.JSONModel({
+                    "OrdemId"       : "",
+                    "DataCriacao"   : null,
+                    "CriadoPor"     : "",
+                    "ClienteId"     : "",
+                    "TotalItens"    : 0,
+                    "TotalFrete"    : 0,
+                    "TotalOrdem"    : 0,
+                    "Status"        : "",
+                    "OrdenacaoCampo": "OrdemId",
+                    "OrdenacaoTipo" : "ASC",
+                    "Limite"        : 25,
+                    "Ignorar"       : 0
+      });
+      oView.setModel(oFilterModel, "filterModel");
+    },
 
+    _onRouteToOrderListView : function() { 
+      const oView = this.getView();
+      const oModel = this.getOwnerComponent().getModel();
+
+      // JSON Model temporário para armazenar os dados formatados
+      var oOrderTableModel  = new sap.ui.model.json.JSONModel([]);
+      oOrderTableModel.setDefaultBindingMode(sap.ui.model.BindingMode.TwoWay);
+
+      // Ativa o indicador de carregamento  
       oView.setBusy(true);
 
       oModel.read("/OVCabSet", {
-        success : function (oData, oResponse) {
-          const formatador = new Intl.NumberFormat("pt-BR", {
+        success: function (oData) {
+          // Formatador para valores monetários no padrão brasileiro
+          const oCurrencyFormatter = new Intl.NumberFormat("pt-BR", {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           });
 
+          // Formatação dos campos monetários de cada item
           oData.results.forEach(item => {
-            item.TotalFrete = formatador.format(item.TotalFrete);
-            item.TotalItens = formatador.format(item.TotalItens);
-            item.TotalOrdem = formatador.format(item.TotalOrdem);
+            item.TotalFrete = oCurrencyFormatter.format(item.TotalFrete);
+            item.TotalItens = oCurrencyFormatter.format(item.TotalItens);
+            item.TotalOrdem = oCurrencyFormatter.format(item.TotalOrdem);
           });
 
-          oModelData.setData(oData.results);
-          oView.setModel(oModelData, "orderTableModel");
+          // Define os dados no model e associa a view
+          oOrderTableModel.setData(oData.results);
+          oView.setModel(oOrderTableModel , "orderTableModel");
+
           oView.setBusy(false);
         },
 
-        error : function (oError) {
-          var oError = JSON.parse(oResponse.responseText);
-          MessageToast.show(oError.error.message.value);
+        error: function (oError) {
+          // Tratamento de erro com feedback ao usuário
+          try {
+              const oResponse = JSON.parse(oError.responseText);
+              MessageToast.show(oResponse.error.message.value);
+          } catch (e) {
+              MessageToast.show("Erro ao carregar os dados.");
+          };
+
           oView.setBusy(false);
         }
       })
     },
 
-    onClickMain: function (oEvent) {
-      var oRoute = sap.ui.core.UIComponent.getRouterFor(this);
-      var oBtn = oEvent.getSource().getId();
-
-
-
-      if (oBtn.includes("btnEditar")) {
-        var oContext = oEvent.getSource().getBindingContext("orderTableModel");
-        var oDadosLinha = oContext.getObject();
-        var id = oDadosLinha.OrdemId;
-
-        oRoute.navTo("RouteToOrderEditScreen", { ordemId: id });
-      } else {
-        oRoute.navTo("RouteToOrderCreateScreen");
-      }
-    },
-
     onFilterSearch : function() {
-      var oView = this.getView();
-      var oModel = this.getOwnerComponent().getModel();
-      var oFModel = oView.getModel("filter");
-      var oTModel = oView.getModel("orderTableModel");
+      const oView        = this.getView();
+      const oModel       = this.getOwnerComponent().getModel();
+      const oFilterModel = oView.getModel("filterModel");
+      const oTableModel  = oView.getModel("orderTableModel");
+      const oFilterData  = oFilterModel.getData();
+      const aParams      = [];
+      const aSorters     = [];
+      const aFilters     = [];
 
-      var oFData = oFModel.getData();
-
-      var oFilter = null;
-      var aParams = [];
-      var aSorter = [];
-      var aFilters = [];
-
-      if(oFData.OrdemId != '') {
-        oFilter = new sap.ui.model.Filter({
-          path: 'OrdemId',
-          operator: sap.ui.model.FilterOperator.EQ,
-          value1: oFData.OrdemId
-        })
-        aFilters.push(oFilter);
+      // Filtro por ID da Ordem (se preenchido)
+      if(oFilterData.OrdemId !== "") {
+        aFilters.push(new sap.ui.model.Filter({
+            path: "OrdemId",
+            operator: sap.ui.model.FilterOperator.EQ,
+            value1: oFilterData.OrdemId
+        }));
       };
 
-      if(oFData.ClienteId != '') {
-        oFilter = new sap.ui.model.Filter({
-          path: 'ClienteId',
-          operator: sap.ui.model.FilterOperator.EQ,
-          value1: oFData.ClienteId
-        })
-        aFilters.push(oFilter);
+      // Filtro por ID do Cliente (se preenchido)
+      if(oFilterData.ClienteId !== "") {
+        aFilters.push(new sap.ui.model.Filter({
+            path: "ClienteId",
+            operator: sap.ui.model.FilterOperator.EQ,
+            value1: oFilterData.ClienteId
+        }));
       };
 
-      var oDescending = false;
-      if(oFData.OrdenacaoTipo == 'DESC') {
-        oDescending = true;
+      const bDescending = oFilterData.OrdenacaoTipo === "DESC";
+
+      // Cria o sorter (se o campo de ordenação estiver preenchido)
+      if(oFilterData.OrdenacaoCampo !== "") {
+        aSorters.push(new sap.ui.model.Sorter(oFilterData.OrdenacaoCampo, bDescending));
       };
 
-      if(oFData.OrdenacaoCampo != '') {
-        var oSort = new sap.ui.model.Sorter(oFData.OrdenacaoCampo, oDescending);
-        aSorter.push(oSort);
-      };
+      // Parâmetros de paginação (OData query options)
+      aParams.push("$top="+oFilterData.Limite);
+      aParams.push("$skip="+oFilterData.Ignorar);
 
-      aParams.push("$top="+oFData.Limite);
-      aParams.push("$skip="+oFData.Ignorar);
-
+      // Ativa o indicador de carregamento
       oView.setBusy(true);
       
+      // Executa a leitura dos dados via OData com os filtros, ordenação e parâmetros definidos
       oModel.read("/OVCabSet", {
-        sorters: aSorter,
-        filters: aFilters,
+        sorters      : aSorters,
+        filters      : aFilters,
         urlParameters: aParams,
 
-        success : function(oData, oResponse) {
-          oTModel.setData(oData.results);
+        success : function(oData) {
+          // Atualiza os dados da tabela com os resultados da leitura
+          oTableModel.setData(oData.results);
           oView.setBusy(false);
         },
         error : function (oResponse) {
-          var oError = JSON.parse(oResponse.responseText);
-          MessageToast.show(oError.error.message.value);
-          oView.setBusy(false);
-        }
-      }
+          // Trata erros e exibe mensagem amigável ao usuário
+            try {
+                const oError = JSON.parse(oResponse.responseText);
+                MessageToast.show(oError.error.message.value);
+            } catch (e) {
+                MessageToast.show("Erro ao buscar dados.");
+            }
+            oView.setBusy(false);
+          }
+        })
+    },
 
-      )
+    onOrderAction: function (oEvent) {
+      const oRouter   = sap.ui.core.UIComponent.getRouterFor(this);
+      const sButtonId = oEvent.getSource().getId();
+
+      // Verifica se o botão clicado é de edição (baseado no ID do botão)
+      if (sButtonId.includes("btnEditar")) {
+        // Obtém o ID da ordem selecionada
+        const oContext       = oEvent.getSource().getBindingContext("orderTableModel");
+        const oSelectedOrder = oContext.getObject();
+        const sOrderId       = oSelectedOrder.OrdemId;
+
+        // Navega para a tela de edição da ordem, passando o ID como parâmetro
+        oRouter.navTo("RouteToOrderEditScreen", { ordemId: sOrderId  });
+      } else {
+
+        // Se não for edição, navega para a tela de criação de nova ordem
+        oRouter.navTo("RouteToOrderCreateScreen");
+      }
     },
 
     onChangeStatus : function (status) {
-      const that = this;
-      const oView = this.getView();
-      let oTable = oView.byId("orderListTable");
-      //let aSelectedIdx = oTable.getSelectedIndices();
-      let aSelectedItems = oTable.getSelectedItems();
-      let oTModel = oView.getModel("orderTableModel");
-      let aTableData = oTModel.getData();
-      let oModel = this.getOwnerComponent().getModel();
-      let oEmptyModel = new sap.ui.model.json.JSONModel();
-      oEmptyModel.setData([]);
+      const oView          = this.getView();
+      const oTable         = oView.byId("orderListTable");
+      const aSelectedItems = oTable.getSelectedItems();
+      const oTModel        = oView.getModel("orderTableModel");
+      const oModel         = this.getOwnerComponent().getModel();
 
-      let completed = 0;
-      let total = aSelectedItems.length;
-      let aResponse = [];
+      if (aSelectedItems.length === 0) {
+        MessageToast.show("Nenhum item selecionado.");
+        return;
+      }
+  
+      const aResponses      = [];
+      let completedRequests = 0;
 
-        if (total === 0) {
-    MessageToast.show("Nenhum item selecionado.");
-    return;
-  }
+      // Função utilitária para tratar respostas de sucesso ou erro.
+      const handleResponse = (response) => {
+        aResponses.push(response);
+        completedRequests++;
 
-      aSelectedItems.forEach(function(oItem) {
+        if (completedRequests === aSelectedItems.length) {
+          this.oOpenDialog(aResponses);
+          }
+
+        };
+
+        aSelectedItems.forEach((oItem) => {
 
         const oContext = oItem.getBindingContext("orderTableModel");
-        const oData = oContext.getObject(); // Objeto da linha selecionada
-
+        const oData    = oContext.getObject();
+        
+        // Itera sobre cada item selecionado para chamar a função OData correspondente
         oModel.callFunction("/ZFI_ATUALIZA_STATUS", {
           method: "GET",
           urlParameters: {
             ID_ORDEMID: oData.OrdemId,
             ID_STATUS: status
           },
-          success : function (oResult) {
+          success: (oResult) => {
             oData.Status = status;
-
             oTModel.refresh();
-
-            aResponse.push(oResult.results);
-
-            completed++;
-            if (completed === total) {
-              that.onOpenDialog(aResponse);
-            };
-
+            handleResponse(oResult.results);
           },
-          error : function (oError) {
-            aResponse.push(JSON.parse(oError.responseText).error.message.value);
-            
-            completed++;
-            if (completed === total) {
-              that.onOpenDialog(aResponse);
-            };
+          error: (oError) => {
+            const sErrorMessage = JSON.parse(oError.responseText).error.message.value;
+            handleResponse(sErrorMessage);  
           }
         });
       });
     },
 
-    onOpenDialog : function (aResponse) {
-        const oView = this.getView();
-        let aMensagens = aResponse.flat();
-        let oMensagensModel = new sap.ui.model.json.JSONModel();
+    oOpenDialog: function (aResponse) {
+        const oView           = this.getView();
+        const aMensagens      = aResponse.flat();
+        const oMensagensModel = new sap.ui.model.json.JSONModel();
+
         oMensagensModel.setData(aMensagens);
         oView.setModel(oMensagensModel, "Mensagens");
 
+        // Recupera e abre o diálogo se ainda não estiver instanciado
         if(!this.oDialog){
           this.oDialog = this.byId("dialogInfoId");
-          this.oDialog.open();
-        } else {
-          this.oDialog.open();
-        };
+        }
+
+        this.oDialog.open();
     },
 
     onCloseDialog : function () {
