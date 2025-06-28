@@ -1,0 +1,42 @@
+<core:FragmentDefinition id="_IDGenFragmentDefinition"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:t="sap.ui.table">
+
+    <Dialog id="dialogInfoId" title="Informação">
+    <Title id="_IDGenTitle" text="Mensagens" level="H4" class="sapUiTinyMarginBegin"/>
+
+    <Table id="dialogTableId" 
+		       class="sapUIResponsiveMargin"
+			   width="auto"
+			   items="{path : 'Mensagens>/'}">
+
+			   <columns>
+			   		<Column id="_IDGenColumn11" hAlign="Begin"
+					         minScreenWidth="Small"
+							 demandPopin="true"
+							 width="0.05em">
+							 <Text id="_IDGenText" text="Tipo"/>
+					</Column>
+
+					<Column id="_IDGenColumn12" hAlign="Begin"
+					         minScreenWidth="Small"
+							 demandPopin="true"
+							 width="1em">
+							 <Text id="_IDGenText25" text="Mensagem"/>
+					</Column>
+
+			   </columns>
+
+			   <items>
+					<ColumnListItem id="_IDGenColumnListItem2" type="Inactive" press="">
+						<core:Icon id="_IDGenIcon" src="{path: 'Mensagens>Tipo', formatter: '.formatter.getIconStatus'}"
+						                         color="{path: 'Mensagens>Tipo', formatter: '.formatter.getColorStatus'}" />
+						<Text id="_IDGenText9" text="{Mensagens>Mensagem}"/>      		
+				    </ColumnListItem>
+			   </items>
+		</Table>
+
+        <Button id="btnFecharDialog" text="Fechar"  press=".onCloseDialog" class="sapUiTinyMarginBegin sapUiSmallMarginBottom" />
+    </Dialog>
+</core:FragmentDefinition>
